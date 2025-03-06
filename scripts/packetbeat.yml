@@ -1,0 +1,132 @@
+packetbeat.interfaces:
+  device: ens3
+  internal_networks: ["private"]
+  type: af_packet
+  buffer_size_mb: 120
+  metrics_interval: 5s
+
+packetbeat.flows:
+  enabled: false
+
+packetbeat.procs.enabled: false
+packetbeat.ignore_outgoing: false
+
+
+packetbeat.protocols:
+- type: http
+  enabled: true
+  #ports: [80, 443]  # 增加443端口以支持HTTPS（需SSL配置）
+  ports: [30080]
+  hide_keywords: ['pass', 'password', 'passwd']
+  send_headers: ["User-Agent", "Cookie", "Set-Cookie"]
+  send_response_headers: true  # 显式启用响应头
+  include_body_for: ["application/json"]
+  real_ip_header: "X-Real-IP"
+  send_response: true
+  send_request: true
+  transaction_timeout: 10s  # 延长超时时间
+  max_message_size: 1048576  # 建议调小至1MB避免过大负载
+
+ 
+
+
+processors:
+  - include_fields:
+      fields:
+        - method
+        - url.full
+        - server.ip
+        - server.port
+        - related.ip 
+        - http.response.body.content
+        - http.response.status_code
+        - http.request.headers.cookie
+
+  - drop_event:
+        when:
+          or:
+              # - contains:
+              #     http.request.path: "http://a.b.com/"
+              - regexp:
+                  url.full: '^http://xxx.*'  #过滤xxx开头的网站
+              
+
+  - drop_event:
+        when:
+          not:
+            and:
+              - equals:
+                  http.response.status_code: 200
+              - or:
+                - regexp:
+                    http.response.body.content: 'b1[3-9]d{9}b'  # 手机号
+                - regexp:
+                    http.response.body.content: 'b[1-9]d{5}(18|19|20)d{2}(0[1-9]|1[0-2])(0[1-9]|[12]d|3[01])d{3}[dXx]b'  # 身份证号
+                # - regexp:
+                #     http.response.body.content: 'b[A-HJ-NPR-Z0-9]{17}b'  # VIN 码
+                #- regexp:
+                  #http.response.body.content: 'b[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领]s*[A-Z]s*[A-Z0-9]{4,7}s*[A-Z0-9挂学警港澳]b'
+
+
+  - script:
+      lang: javascript
+      source: >
+        function process(event) {
+        
+          var body = event.Get("http.response.body.content");
+          if (body) {
+          
+            body = body.replace(/(1[3-9]d{1,2})d{4}(d{4})/g, "$1****$2");
+            
+            body = body.replace(/(d{6})d{8}(d{4})/g, "$1********$2");
+             
+            var matches = body.match(/(1[3-9]d{1,2}****d{4}|d{6}********d{4})/g);
+            if (matches) {
+              event.Put("http.response.body.content", matches.join(", "));  
+            } else {
+              event.Put("http.response.body.content", "");  
+            }
+          }
+          
+        }
+
+
+# output.console:
+#   enabled: true
+#   codec.json:
+#     pretty: true
+
+output.kafka:
+  enabled: true
+  hosts: ["localhost:9092"]
+  topic: beats
+  key: ''
+  metadata:
+    retry.max: 3
+    retry.backoff: 250ms
+    refresh_frequency: 10m
+    full: false
+  max_retries: 3
+  backoff.init: 1s
+  backoff.max: 60s
+  bulk_max_size: 2048
+  bulk_flush_frequency: 0s
+  timeout: 120s
+  broker_timeout: 60s
+  channel_buffer_size: 256
+  keep_alive: 0
+  compression: gzip
+  compression_level: 4
+  max_message_bytes: 100000
+  required_acks: 1
+  client_id: beats
+  ssl.enabled: false
+
+
+setup.template.enabled: false  # 禁用默认模板（如不使用ES）
+logging.level: error # 明确日志级别
+logging.to_files: true
+logging.files:
+  path: /data/packetbeat/log
+  name: packetbeat.log
+  keepfiles: 7
