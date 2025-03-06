@@ -47,7 +47,7 @@ graph TD
 
 
 1. 多维度风险分析
-   
+
    - IP行为分析
    
    - 时间特征分析
@@ -58,7 +58,7 @@ graph TD
 
 
 3. 实时处理能力
-   
+
    - 并发处理
    
    - 内存缓存
@@ -67,7 +67,7 @@ graph TD
 
 
 5. 可扩展性
-   
+
    - 模块化设计
    
    - 规则可配置
@@ -77,7 +77,7 @@ graph TD
 
 
 5. 性能优化
-   
+
    - 白名单前置
    
    - 数据定期清理
@@ -86,7 +86,7 @@ graph TD
 
 
 7. 监控告警
-   
+
    - Prometheus指标
    
    - 告警通知
@@ -107,9 +107,9 @@ graph TD
 ## 使用方法
 1. 部署nginx代理服务器、kafka、mysql、influxdb
    - nginx站点的反向代理需设置以下两个参数:
-     >  proxy_set_header X-Real-IP $remote_addr;
-		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-     > 
+     > proxy_set_header X-Real-IP $remote_addr;
+     > proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+     
 3. 修改config/config.yaml中的配置信息
 4. 在nginx反向代理服务器部署packetbeat，使用scripts中的packetbeat.yml启动packetbeat
    - 注意修改packetbeat.yml中的“port”为后端的web端口
