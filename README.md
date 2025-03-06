@@ -92,7 +92,7 @@ graph TD
 4. 在nginx反向代理服务器部署packetbeat，使用scripts中的packetbeat.yml启动packetbeat
    - 注意修改packetbeat.yml中的“port”为后端的web端口
    - packetbeat -c packetbeat.yml run #测试环境
-   - ![packetbeat配置参数][https://www.elastic.co/guide/en/beats/packetbeat/current/configuration-general-options.html]
+   - [packetbeat配置参数][https://www.elastic.co/guide/en/beats/packetbeat/current/configuration-general-options.html]
    - 启动后，注意观察packetbeat对web服务器造成的压力，经过实测，8c16G的配置中，业务1k QPS左右时，packetbeat对web服务器造成的压力可以忽略。但，**建议限制packetbeat的cpu使用率** 。
 6. 使用kafka gui工具观察topic是否有数据进入（默认topic名为 beats）
 7. 使用go run main.go 启动哮天犬系统，使用tail -f log/app.log 观察日志输出。
