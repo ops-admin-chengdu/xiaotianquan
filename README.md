@@ -44,8 +44,8 @@ graph TD
 ```
 
 ## 效果图
-![图片1]（./scripts/img/1.jpg）
-![图片2]（./scripts/img/2.jpg）
+![图片1](./scripts/img/1.jpg)
+![图片2](./scripts/img/2.jpg)
 
 
 ## 关键特性
