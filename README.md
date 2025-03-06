@@ -49,36 +49,48 @@ graph TD
 1. 多维度风险分析
    
    - IP行为分析
+   
    - 时间特征分析
+   
    - 地理位置分析
+   
    - 历史行为分析
 
 
-2. 实时处理能力
+3. 实时处理能力
    
    - 并发处理
+   
    - 内存缓存
+   
    - 异步通知
 
 
-3. 可扩展性
+5. 可扩展性
    
    - 模块化设计
+   
    - 规则可配置
+   
    - 指标可监控
+   
 
 
-4. 性能优化
+5. 性能优化
    
    - 白名单前置
+   
    - 数据定期清理
+   
    - 缓存机制
 
 
-5. 监控告警
+7. 监控告警
    
    - Prometheus指标
+   
    - 告警通知
+   
    - 历史记录
 
 ## 风险识别策略（基于UEBA；举例，详见代码）
@@ -92,5 +104,19 @@ graph TD
 | 跨地域关联检测       | 非中国大陆IP                                                             | +8       |
 | IP归属               | 已知数据中心/云服务商IP段-通过ASN数据库                                  | +8       |
 
-
+## 使用方法
+1. 部署nginx代理服务器、kafka、mysql、influxdb
+   - nginx站点的反向代理需设置以下两个参数:
+     >  proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+     > 
+3. 修改config/config.yaml中的配置信息
+4. 在nginx反向代理服务器部署packetbeat，使用scripts中的packetbeat.yml启动packetbeat
+   - 注意修改packetbeat.yml中的“port”为后端的web端口
+   - packetbeat -c packetbeat.yml run #测试环境
+   - ![packetbeat配置参数][https://www.elastic.co/guide/en/beats/packetbeat/current/configuration-general-options.html]
+   - 启动后，注意观察packetbeat对web服务器造成的压力，经过实测，8c16G的配置中，业务1k QPS左右时，packetbeat对web服务器造成的压力可以忽略。但，**建议限制packetbeat的cpu使用率** 。
+6. 使用kafka gui工具观察topic是否有数据进入（默认topic名为 beats）
+7. 使用go run main.go 启动哮天犬系统，使用tail -f log/app.log 观察日志输出。
+8. 本项目暂未考虑性能优化等，欢迎大家提交PR优化代码，增加web大盘以及各种风险策略等。
    
