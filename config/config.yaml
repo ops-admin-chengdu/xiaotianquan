@@ -1,0 +1,31 @@
+influxdb:
+  url: "http://localhost:8086"
+  token: "Rg2veI73Ka8q-vFawyEtDH13s-9e-hfqsKoPkhry3W-XR0KNmevjq14DWLvD0joyne7hRjb_SF_mF3LmC8n9Bg=="
+  org: "xiaotianquan"
+  bucket: "packet_data"
+
+mysql:
+  dsn: "user:passwd@tcp(localhost:3306)/xiaotianquan?charset=utf8mb4&parseTime=True&loc=Local"
+  maxIdle: 10
+  maxOpen: 100
+
+kafka:
+  brokers:
+    - "localhost:9092"
+  topic: "beats"
+  groupId: "risk-analyzer"
+
+geoip:
+  cityPath: "GeoIP/GeoLite2-City.mmdb"
+  asnPath: "GeoIP/GeoLite2-ASN.mmdb"
+
+webhook:
+  url: "http://your-webhook-url"
+
+log:
+  level: "info"
+  path: "logs/app.log"
+
+Security:
+  whitelist_ips:
+    - "127.0.0.1/24"
